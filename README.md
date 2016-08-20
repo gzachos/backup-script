@@ -16,6 +16,12 @@ was taken this week, a backup is taken no matter what.
   -  Backups older than 5 weeks (counting current week) are deleted unless the
 total number of backups is less than 6 (<=5).
 
+Screenshots
+-----------
+<br>_Manual Execution_<br>
+![Manual Execution](./screenshots/manual-execution.png)
+
+
 Configuration
 -------------
 The configuration section is the only section you should modify, unless you really(!)
