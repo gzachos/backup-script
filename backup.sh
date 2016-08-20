@@ -27,12 +27,13 @@
 # Example cron entry:
 # @midnight /root/bin/backup.sh
 #
-# Details: Every "<token-uppercase>_BACKUP_DAY" a backup is taken. If no backup
-# was taken the week before (Mon -> Sun) AND if no backup was taken this week,
-# a backup is taken no matter what.
+# Details: Every "<token-uppercase>_BACKUP_DAY" a backup is taken,
+# unless a backup was already taken this week. If no backup was
+# taken the previous week (Mon -> Sun) AND  if no backup was taken
+# this week, a backup is taken no matter what.
 #
-# Backups older than 4 weeks are deleted unless the total number of backups
-# is less than 5 (<=4).
+# Backups older than 5 weeks (counting current week) are deleted unless
+# the total number of backups is less than 6 (<=5).
 
 
 TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S") # Do NOT modify!
@@ -209,20 +210,13 @@ timestamp_diff () {
 # Calculates the timestamp of previous week's Monday and Sunday 
 # (time 00:00:00). Monday is assumed to be the first day of the week.
 # The results are stored in ${MON} and ${SUN}.
-#
-# Addition: ${LAST_MON} holds the timestamp of the most recent Monday.
-# If today is Monday, the current date will be stored in ${LAST_MON}
-# (time 00:00:00).
 get_prev_week () {
 	SUN=$(date "+%Y-%m-%d_%H-%M-%S" --date="last Sunday")
 	MON=$(date "+%Y-%m-%d_%H-%M-%S" --date="last Monday")
-	LAST_MON=$(date "+%Y-%m-%d_%H-%M-%S" --date="last Monday")
 	timestamp_diff ${MON} ${SUN}
 	if [ ${DIFF} -eq 1 ]
 	then
 		MON=$(date "+%Y-%m-%d_%H-%M-%S" --date="last Monday -1 week")
-	else
-		LAST_MON=$(date "+%Y-%m-%d_%H-%M-%S" --date="today 00:00:00")
 	fi
 }
 
@@ -271,12 +265,13 @@ conduct_backup () {
 
 # Does all the job.
 # 	- Checks if a backup was taken this week.
-#	- Checks if a any backups were taken the last 5 weeks.
+#	- Checks if a any backups were taken the last 6 weeks.
 #	- If today is "<token-uppercase>_BACKUP_DAY" a backup is taken.
 #	- If no backups were taken this week or the preview one,
 #	  a backup is taken.
-#	- If the total number of backups is more than 4 (>=5),
-#	  excess backups which are older than 4 weeks are deleted. 
+#	- If the total number of backups is more than 5 (>=6),
+#	  excess backups which are older than 5 weeks are deleted.
+#	  (counting current week in those 5)
 # Parameter:	$1 -> {WIKI, CLOUD, ...}
 check_backups () {
 	TOKEN_LOWERCASE=$(echo ${1} | tr '[:upper:]' '[:lower:]')
@@ -288,28 +283,16 @@ check_backups () {
 	TODAY=$(date +%a)
 	FILENUM_SUM=0
 	DELETED_SUM=0
-	FLAG="false" # true if a backup was taken this week
 
 	get_prev_week
 
-	for file in ${BACKUP_FILES}
-	do
-		BACKUP_TIME=${file:(-26):19}
-		compare_dates ${LAST_MON} ${BACKUP_TIME}
-		if [ ${?} -le 1 ]
-		then
-			FLAG="true"
-		fi
-	done
-
-	if [ "${TODAY}" == "${!BACKUP_DAY}" ] && [ "${FLAG}" == "false" ]
-	then
-		conduct_backup ${1}
-	fi
+	# Update $MON and $SUN to hold the timestamp of current week.
+	MON=$(date "+%Y-%m-%d_%H-%M-%S" --date="${MON::10} +1 week")
+	SUN=$(date "+%Y-%m-%d_%H-%M-%S" --date="${SUN::10} +1 week")
 
 	echo -e "\n##### $1\n"
 
-	for week in `seq 1 5`
+	for week in `seq 1 6`
 	do
 		FILENUM=0
 		echo "WEEK {${MON::10} -> ${SUN::10}}"
@@ -326,7 +309,7 @@ check_backups () {
 				echo -e "\t${file}"
 				((FILENUM++))
 
-				if [ ${week} -eq 5 ] && [ $((FILENUM_SUM + FILENUM)) -gt 4 ]
+				if [ ${week} -eq 6 ] && [ $((FILENUM_SUM + FILENUM)) -gt 5 ]
 				then
 					echo -e "\t[rm ${!BACKUPS_DIR}/${file}]"
 					rm ${!BACKUPS_DIR}/${file}
@@ -335,25 +318,35 @@ check_backups () {
 			fi
 		done
 
-		if [ ${FILENUM} -eq 0 ]
+		if [ ${week} -eq 1 ] && [ "${TODAY}" == "${!BACKUP_DAY}" ] && [ ${FILENUM} -eq 0 ]
 		then
-			if [ ${week} -eq 1 ] && [ "${FLAG}" == "false" ]
-			then
-				conduct_backup ${1}
-			fi
-			echo -e "\tNo backup files were found!"
+			conduct_backup ${1}
+			((FILENUM++))
 		fi
 
 		((FILENUM_SUM += FILENUM))
+
+		if [ ${week} -eq 2 ] && [ ${FILENUM_SUM} -eq 0 ]
+		then
+			conduct_backup ${1}
+			((FILENUM++))
+			((FILENUM_SUM++))
+		fi
+
+		if [ ${FILENUM} -eq 0 ]
+		then
+			echo -e "\tNo backup files were found!"
+		fi
+
 		MON=$(date "+%Y-%m-%d_%H-%M-%S" --date="${MON::10} -1 week")
 		SUN=$(date "+%Y-%m-%d_%H-%M-%S" --date="${SUN::10} -1 week")
 	done
 
 	echo " "
 	echo "===== REPORT ====="
-	echo "${FILENUM_SUM} ${2} backup files were found!"
-	echo "${DELETED_SUM} ${2} backup files were deleted!"
-	echo "$((FILENUM_SUM-DELETED_SUM)) ${2} OLD backup files currently exist!"
+	echo "${FILENUM_SUM} ${2} backup file(s) exist!"
+	echo "${DELETED_SUM} ${2} backup file(s) were deleted!"
+	echo "$((FILENUM_SUM-DELETED_SUM)) ${2} OLD backup file(s) currently exist!"
 }
 
 ###################################################################
