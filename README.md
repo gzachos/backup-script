@@ -38,9 +38,9 @@ TOKENS="WIKI CLOUD"     # For any additional entry add the appropriate
 
 __Template__ - The three lines that should be added for every new directory addition.
 ```Shell
-# <token-uppercase>_BACKUPS_DIR="/path/to/dir"     # No '/' at the end of the path!
-# <token-uppercase>_DIR="/path/to/another-dir"     # No '/' at the end of the path!
-# <token-uppercase>_BACKUP_DAY="<weekday-3-letters>"
+<token-uppercase>_BACKUPS_DIR="/path/to/dir"     # No '/' at the end of the path!
+<token-uppercase>_DIR="/path/to/another-dir"     # No '/' at the end of the path!
+<token-uppercase>_BACKUP_DAY="<weekday-3-letters>"
 ```
 
 Example No.1
