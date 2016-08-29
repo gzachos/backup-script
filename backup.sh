@@ -27,10 +27,9 @@
 # Example cron entry:
 # @midnight /root/bin/backup.sh
 #
-# Details: Every "<token-uppercase>_BACKUP_DAY" a backup is taken,
-# unless a backup was already taken this week. If no backup was
-# taken the previous week (Mon -> Sun) AND  if no backup was taken
-# this week, a backup is taken no matter what.
+# Details: Every "<token-uppercase>_BACKUP_DAY" a backup is taken.
+# If no backup was taken the previous week (Mon -> Sun) AND  if no
+# backup was taken this week, a backup is taken no matter what.
 #
 # Backups older than 5 weeks (counting current week) are deleted unless
 # the total number of backups is less than 6 (<=5).
@@ -318,7 +317,7 @@ check_backups () {
 			fi
 		done
 
-		if [ ${week} -eq 1 ] && [ "${TODAY}" == "${!BACKUP_DAY}" ] && [ ${FILENUM} -eq 0 ]
+		if [ ${week} -eq 1 ] && [ "${TODAY}" == "${!BACKUP_DAY}" ]
 		then
 			conduct_backup ${1}
 			((FILENUM++))

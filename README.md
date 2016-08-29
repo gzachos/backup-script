@@ -9,8 +9,7 @@ by compressing and storing them. It is designed to be executed @midnight (same a
 
 Details
 -------
-  - Every "\<token-uppercase\>\_BACKUP\_DAY" a backup is taken, unless a backup was
-already taken this week.
+  - Every "\<token-uppercase\>\_BACKUP\_DAY" a backup is taken.
   - If no backup was taken the previous week (Mon -> Sun) **AND**  if no backup
 was taken this week, a backup is taken no matter what.
   -  Backups older than 5 weeks (counting current week) are deleted unless the
