@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #+-----------------------------------------------------------------------+
-#|                Copyright (C) 2016 George Z. Zachos                    |
+#|              Copyright (C) 2016-2018 George Z. Zachos                 |
 #+-----------------------------------------------------------------------+
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -54,7 +54,7 @@ DAYS=(Mon Tue Wed Thu Fri Sat Sun)
 # examples below to get a better understanding.
 
 # Example of ${TOKENS} variable.
-TOKENS="WIKI CLOUD"	# For any additional entry add the appropriate 
+TOKENS="WIKI CLOUD"	# For any additional entry add the appropriate
 			# <token-uppercase> separating it with a space
 			# character from existing tokens.
 
@@ -78,7 +78,7 @@ CLOUD_BACKUP_DAY="Sat"
 ###################################################################
 
 # Checks if the directory where the backups will be saved exists
-# (creates it if needed), then checks if the directory to be backed 
+# (creates it if needed), then checks if the directory to be backed
 # up exists and finally if the day for the backup to be taken
 # is valid.
 #
@@ -172,7 +172,7 @@ compare_dates () {
 #                         timestamp_diff()                        #
 ###################################################################
 
-# Calculates and returns the difference (absolute value in days) 
+# Calculates and returns the difference (absolute value in days)
 # between the two (2) timestamps given as function parameters.
 # The result is stored in variable ${DIFF}.
 #
@@ -206,7 +206,7 @@ timestamp_diff () {
 #                        get_prev_week()                          #
 ###################################################################
 
-# Calculates the timestamp of previous week's Monday and Sunday 
+# Calculates the timestamp of previous week's Monday and Sunday
 # (time 00:00:00). Monday is assumed to be the first day of the week.
 # The results are stored in ${MON} and ${SUN}.
 get_prev_week () {
@@ -245,7 +245,7 @@ conduct_backup () {
 	echo -e "This might take some time!\n"
 
 	tar -zcf ${TEMPFILE} -C ${PATHTODIR} ./${token}
-	
+
 	if [ $? -ne 0 ]
 	then
 		echo "tar: Exited with errors!"
@@ -254,7 +254,7 @@ conduct_backup () {
 		exit 3
 	fi
 
-	TOKEN_LOWERCASE=$(echo ${1} | tr '[:upper:]' '[:lower:]')	
+	TOKEN_LOWERCASE=$(echo ${1} | tr '[:upper:]' '[:lower:]')
 	mv ${TEMPFILE} ${!BACKUPS_DIR}/backup_${TOKEN_LOWERCASE}_${TIMESTAMP}.tar.gz
 }
 
@@ -313,7 +313,7 @@ check_backups () {
 					echo -e "\t[rm ${!BACKUPS_DIR}/${file}]"
 					rm ${!BACKUPS_DIR}/${file}
 					((DELETED_SUM++))
-				fi	
+				fi
 			fi
 		done
 
