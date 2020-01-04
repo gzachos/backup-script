@@ -57,7 +57,7 @@ Example cron entry:
 ```
 
 ## Developer
-[George Z. Zachos](http://cse.uoi.gr/~gzachos)
+[George Z. Zachos](https://gzachos.com)
 
 ## Licence
 [GNU GENERAL PUBLIC LICENSE Version 2, June 1991](LICENSE)
